@@ -4,6 +4,11 @@ const NAV_LINKS = [
   { href: "/apply", label: "Apply" },
   { href: "/dashboard", label: "Staff dashboard" },
   { href: "/schema", label: "Data dictionary" },
+  {
+    href: "/under-the-hood",
+    label: "Under the hood",
+    tourId: "nav-under-the-hood",
+  },
 ];
 
 export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
@@ -50,7 +55,11 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
             <ul className="usa-nav__primary usa-accordion">
               {NAV_LINKS.map((link) => (
                 <li key={link.href} className="usa-nav__primary-item">
-                  <Link href={link.href} className="usa-nav__link">
+                  <Link
+                    href={link.href}
+                    className="usa-nav__link"
+                    data-tour={link.tourId}
+                  >
                     <span>{link.label}</span>
                   </Link>
                 </li>

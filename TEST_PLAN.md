@@ -11,7 +11,7 @@ the actual automated check where one exists (`npm run <script>` — see
 | --- | --- | --- |
 | Lint | `npm run lint` | ESLint rules across `app/`, `components/`, `lib/`. |
 | Type check + production build | `npm run build` | TypeScript errors, server/client boundary mistakes, static generation of `/`, `/apply`, `/schema`. |
-| Accessibility (WCAG 2.1 A/AA) | `npm run test:a11y` | `tests/a11y.spec.ts` — axe-core scan of every unauthenticated static page: `/`, `/apply`, `/schema`, `/third-party/invalid-token`. Requires a Chromium binary; set `PLAYWRIGHT_CHROMIUM_PATH` if the pinned Playwright revision isn't installed (see `LESSONS_LEARNED.md`). |
+| Accessibility (WCAG 2.1 A/AA) | `npm run test:a11y` | `tests/a11y.spec.ts` — axe-core scan of every unauthenticated static page: `/`, `/apply`, `/schema`, `/third-party/invalid-token`, `/under-the-hood`. Requires a Chromium binary; set `PLAYWRIGHT_CHROMIUM_PATH` if the pinned Playwright revision isn't installed (see `LESSONS_LEARNED.md`). |
 
 These three are cheap and fast — run them before anything manual below,
 and re-run all three after any fix, not just the one that failed.
@@ -53,7 +53,31 @@ and re-run all three after any fix, not just the one that failed.
 | Schema page matches `lib/schema.ts` | Manual: spot-check a field's required/optional status and shape against the rendered JSON Schema after any change to `lib/schema.ts`. | Regression |
 | Keyboard access to the scrollable schema block | Covered by `npm run test:a11y` (`tabIndex`/`aria-label` regression, see `LESSONS_LEARNED.md`). | Regression |
 
-## 5. Deployment / environment
+## 5. Guided tours (landing, wizard, physician portal, dashboard, schema)
+
+| What to test | How | Priority |
+| --- | --- | --- |
+| Landing page tour covers hero, disclaimer, capabilities, CTA, and the "Under the hood" nav link | Manual: click **Take the tour** on `/`, step through to the end with **Next**, confirm each highlighted element matches its step's copy. | Smoke |
+| Wizard tour jumps across steps without losing entered data | Manual: on `/apply`, start the tour on step 1, step through to the evidence-upload highlight (step 5 of 7) and the review highlight (step 7 of 7); confirm the wizard actually navigates there (not just visually) and any previously entered fields are still intact after the jump. | Regression — tour state must live in the parent `ApplyWizard`, not the per-step components, since steps unmount/remount on switch (see `LESSONS_LEARNED.md`). |
+| Wizard tour jump past evidence/routing steps without an existing draft | Manual: start the tour before filling in any step and jump straight past step 4; confirm `jumpToStep` silently creates a draft submission so steps 5–6 render instead of erroring. | Edge case |
+| Physician portal and dashboard tours highlight the right regions | Manual: open a valid `/third-party/<token>` link and click **Take the tour**; sign in to `/dashboard` and click **Take the tour**; confirm each step's highlight matches its described region. | Smoke |
+| Schema page tour | Manual: click **Take the tour** on `/schema`; confirm it highlights the hero and the data-dictionary block. | Smoke |
+| Tour respects `prefers-reduced-motion` | Manual: enable reduced-motion in OS/browser settings, start any tour, confirm it jumps to each highlight instead of smooth-scrolling. | Edge case |
+| `/under-the-hood` deliberately has no tour button | Manual: confirm no **Take the tour** button renders on `/under-the-hood` — the page is already linear. | Regression |
+
+## 6. `/under-the-hood` live demonstration page
+
+| What to test | How | Priority |
+| --- | --- | --- |
+| `GET /api/status` reports real env/DB/deployment state | Manual/`curl`: hit `/api/status` with and without `DATABASE_URL`/`AUTH_SECRET`/Google env vars set; confirm booleans and DB reachability reflect actual state, not hardcoded values. | Smoke |
+| Extraction preview calls the real mock-extraction function | Manual: on `/under-the-hood`, pick a document type and click **Run extraction**; confirm the returned JSON matches what the same document type produces in the real `/apply` evidence-upload step. | Regression |
+| `POST /api/demo/extract-preview` is safe and side-effect-free | Manual/`curl`: POST a valid and an invalid `documentType`; confirm a 400 with issues on invalid input, and that no submission/trace record is created by a valid call (this endpoint takes no submission id and only calls the pure `mockExtractFields` function). | Edge case |
+| "Call the submissions API with no session" button shows the real 401 | Manual: click it on `/under-the-hood`; confirm the response shown is the actual `{"error":"Unauthorized"}` from the real route, not a canned string. | Smoke |
+| "Fetch an invalid third-party token" button shows the real 404 | Manual: click it; confirm the response matches what `/third-party/invalid-token` itself returns. | Smoke |
+| Incident case study renders the real diff and links to `LESSONS_LEARNED.md` | Manual: scroll to the incident section; confirm the before/after code snippet matches the actual historical fix and the link resolves. | Regression |
+| "Re-check now" refreshes status tiles without a full page reload | Manual: change an env var (or simulate DB unreachability), click **Re-check now**, confirm the tiles update without navigating away. | Edge case |
+
+## 7. Deployment / environment
 
 | What to test | How | Priority |
 | --- | --- | --- |

@@ -210,6 +210,67 @@ Moving from an approximated "VA.gov-inspired" palette to the actual
   open, position\:fixed at 15rem wide. It looked like a layout bug on
   first screenshot; it isn't one we introduced.
 
+## Guided tour state must live above the components that unmount
+
+Porting a "Take the tour" walkthrough (adapted from `raven_demo`) into the
+7-step Lifestage wizard hit a state-lifetime bug before it ever shipped:
+each wizard step is rendered as `{stepIndex === N && <StepComponent/>}`, so
+switching steps genuinely unmounts the previous step's component tree and
+mounts a new one — it's not just visually hidden. Putting the tour's
+active/index state inside a per-step component, or even inside
+`WizardShell` (rendered fresh per step), meant the tour reset or
+disappeared every time it tried to jump the user to a different step to
+highlight something there. Fixed by lifting all tour state into
+`ApplyWizard` (the parent that persists across every step switch) and
+rendering the `<TourLauncher>` button as a sibling *outside* the
+per-step conditional blocks; each tour step's `beforeShow` calls a
+`jumpToStep` helper on the parent to actually navigate before highlighting.
+`WizardShell` itself only gained a presentational `tourId` prop for the
+`data-tour` attribute — it holds no tour state of its own. Lesson: before
+attaching any state to a component whose sibling gets swapped in and out,
+check whether that component itself survives the swap; if it doesn't,
+the state has to live in the ancestor that does.
+
+## `react-hooks/set-state-in-effect`: two different correct fixes, not one
+
+Building the tour component and the `/under-the-hood` live-status page hit
+this newer ESLint rule twice, and the two occurrences needed genuinely
+different fixes — reaching for the same pattern both times would have been
+wrong at least once:
+
+- **Resetting state when a prop changes** (`GuidedTour` resetting its step
+  index to 0 whenever `active` flips true) is not an effect's job at all.
+  `useEffect(() => { if (active) setIndex(0); }, [active])` is exactly the
+  pattern React's own docs warn about (it renders once with stale state,
+  then re-renders after the effect fires). Fixed with the documented
+  "adjust state during render" pattern instead — track the previous value
+  of the prop being watched and compare during render:
+  ```tsx
+  const [wasActive, setWasActive] = useState(active);
+  if (active !== wasActive) {
+    setWasActive(active);
+    if (active) setIndex(0);
+  }
+  ```
+- **Fetching on mount** (`/under-the-hood`'s initial `/api/status` call)
+  *is* legitimately an effect's job, but calling a named async helper
+  function from inside the effect (`useEffect(() => { loadStatus(); }, [])`)
+  still tripped the rule — the linter's reachability analysis can't see
+  through the indirection to confirm the helper doesn't synchronously call
+  `setState` before its first `await`. Fixed by inlining the
+  `fetch().then()/.catch()` promise chain directly in the effect body
+  instead of calling out to a named function, matching a pattern already
+  in use elsewhere in this codebase (`physician-portal.tsx`'s token fetch).
+  The named helper was kept as a separate function for the "Re-check now"
+  button's `onClick`, which isn't inside an effect and isn't subject to the
+  rule at all.
+
+Lesson: this rule flags two unrelated situations (state derived from props,
+and same-tick `setState` calls the linter can't trace) that happen to
+produce the same warning text — diagnose which one you actually have
+before picking a fix, rather than applying whichever pattern fixed it last
+time.
+
 ## Process: don't stack new work on an already-merged PR's branch
 
 Once a PR merges, its source branch is finished — pushing new commits

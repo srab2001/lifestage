@@ -57,7 +57,7 @@ export function EvidenceStep({
     <div className="flex flex-col gap-6">
       <div>
         <p className="mb-3 text-sm font-semibold">Supporting evidence</p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3" data-tour="evidence-upload">
           {UPLOAD_BUTTONS.map((btn) => (
             <Button
               key={btn.type}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
+import { TourLauncher, type TourStep } from "@/components/guided-tour";
 import type { ThirdPartyRequest } from "@/lib/schema";
 
 type LoadState =
@@ -98,19 +99,41 @@ export function PhysicianPortal({ token }: { token: string }) {
     );
   }
 
+  const TOUR_STEPS: TourStep[] = [
+    {
+      selector: '[data-tour="physician-intro"]',
+      title: "No account required",
+      body: "This page is reachable only through the single-use link generated in the claimant's interview — there's no sign-in, and the link stops working the moment it's submitted.",
+    },
+    {
+      selector: '[data-tour="physician-form"]',
+      title: "Complete and e-sign",
+      body: "Physician name, clinical findings, and a typed signature. Submitting finalizes this exam and immediately updates the claimant's submission status and the staff dashboard's trace — no polling or refresh needed on either side.",
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-xl px-6 py-12">
-      <h1 className="text-xl font-bold text-[color:var(--color-navy)]">
-        Examination for VA Form 21-2680
-      </h1>
-      <p className="mt-2 text-sm text-[color:var(--color-muted)]">
-        You&apos;ve received a secure, single-use request to complete this
-        exam for {state.claimantName || "the claimant"}
-        {state.veteranName ? ` (Veteran: ${state.veteranName})` : ""}. No
-        VA.gov account is required.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4" data-tour="physician-intro">
+        <div>
+          <h1 className="text-xl font-bold text-[color:var(--color-navy)]">
+            Examination for VA Form 21-2680
+          </h1>
+          <p className="mt-2 text-sm text-[color:var(--color-muted)]">
+            You&apos;ve received a secure, single-use request to complete this
+            exam for {state.claimantName || "the claimant"}
+            {state.veteranName ? ` (Veteran: ${state.veteranName})` : ""}. No
+            VA.gov account is required.
+          </p>
+        </div>
+        <TourLauncher steps={TOUR_STEPS} />
+      </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5 rounded border border-[color:var(--color-border)] p-6">
+      <form
+        onSubmit={handleSubmit}
+        data-tour="physician-form"
+        className="mt-6 flex flex-col gap-5 rounded border border-[color:var(--color-border)] p-6"
+      >
         <Field label="Examining physician name" htmlFor="physician-name">
           <input
             id="physician-name"

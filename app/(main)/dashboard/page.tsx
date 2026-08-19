@@ -2,6 +2,25 @@ import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { getStore } from "@/lib/store";
 import { StatusBadge } from "@/components/ui";
+import { TourLauncher, type TourStep } from "@/components/guided-tour";
+
+const TOUR_STEPS: TourStep[] = [
+  {
+    selector: '[data-tour="dashboard-metrics"]',
+    title: "Six live metrics",
+    body: "Read directly from the store on every page load — total submissions, how many are complete, how many are waiting on a physician, average extraction confidence, third-party completion rate, and total trace events recorded system-wide.",
+  },
+  {
+    selector: '[data-tour="dashboard-claims"]',
+    title: "Claims list",
+    body: "Every submission created through the interview shows up here in real time. Click a row to load its detail and transaction trace on the right.",
+  },
+  {
+    selector: '[data-tour="dashboard-trace"]',
+    title: "Transaction trace",
+    body: "Every meaningful step — intake, extraction, routing, validation, submission — recorded in order with a timestamp. This is what proves a submission didn't silently fail somewhere, directly answering the PWS's data governance and observability language.",
+  },
+];
 
 export const dynamic = "force-dynamic";
 
@@ -46,24 +65,30 @@ export default async function DashboardPage({
             the recurring Delivery and Monitoring Report (PWS 5.2).
           </p>
         </div>
-        {session?.user && (
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/" });
-            }}
-          >
-            <p className="text-xs text-[color:var(--color-muted)]">
-              Signed in as {session.user.email}
-            </p>
-            <button type="submit" className="text-xs font-semibold text-[color:var(--color-blue)] hover:underline">
-              Sign out
-            </button>
-          </form>
-        )}
+        <div className="flex items-start gap-4">
+          <TourLauncher steps={TOUR_STEPS} />
+          {session?.user && (
+            <form
+              action={async () => {
+                "use server";
+                await signOut({ redirectTo: "/" });
+              }}
+            >
+              <p className="text-xs text-[color:var(--color-muted)]">
+                Signed in as {session.user.email}
+              </p>
+              <button type="submit" className="text-xs font-semibold text-[color:var(--color-blue)] hover:underline">
+                Sign out
+              </button>
+            </form>
+          )}
+        </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div
+        data-tour="dashboard-metrics"
+        className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
+      >
         <StatCard label="Total submissions" value={String(metrics.totalSubmissions)} />
         <StatCard label="Complete" value={String(metrics.completeSubmissions)} />
         <StatCard label="Pending third-party" value={String(metrics.pendingThirdParty)} />
@@ -73,7 +98,7 @@ export default async function DashboardPage({
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-        <div>
+        <div data-tour="dashboard-claims">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-[color:var(--color-muted)]">
             Claims
           </h2>
@@ -141,7 +166,10 @@ export default async function DashboardPage({
             <p className="text-sm text-[color:var(--color-muted)]">Select a claim.</p>
           )}
 
-          <h2 className="mb-3 mt-6 text-sm font-bold uppercase tracking-wide text-[color:var(--color-muted)]">
+          <h2
+            data-tour="dashboard-trace"
+            className="mb-3 mt-6 text-sm font-bold uppercase tracking-wide text-[color:var(--color-muted)]"
+          >
             Transaction trace
           </h2>
           {traceEvents.length === 0 ? (

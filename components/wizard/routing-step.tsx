@@ -45,9 +45,11 @@ export function RoutingStep({
         automatically.
       </p>
 
-      <Button type="button" onClick={sendLink} disabled={sending || !submissionId || !!request}>
-        {sending ? "Sending…" : request ? "Link sent" : "Send secure link to physician"}
-      </Button>
+      <div data-tour="routing-send">
+        <Button type="button" onClick={sendLink} disabled={sending || !submissionId || !!request}>
+          {sending ? "Sending…" : request ? "Link sent" : "Send secure link to physician"}
+        </Button>
+      </div>
 
       {request && (
         <div className="rounded border border-[color:var(--color-border)] p-4">

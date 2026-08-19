@@ -1,4 +1,5 @@
 import { LinkButton } from "@/components/ui";
+import { TourLauncher, type TourStep } from "@/components/guided-tour";
 
 const CAPABILITIES = [
   {
@@ -27,20 +28,59 @@ const CAPABILITIES = [
   },
 ];
 
+const TOUR_STEPS: TourStep[] = [
+  {
+    selector: '[data-tour="hero"]',
+    title: "Welcome to Lifestage Benefits Optimization",
+    body: "This is a working proof-of-concept for VA-26-00077490, not a slide deck — every screen this tour visits is a real, running feature. Skip ahead or go back any time.",
+  },
+  {
+    selector: '[data-tour="disclaimer"]',
+    title: "Scope, up front",
+    body: "This demo shows the interaction design and data flow working end to end. It intentionally doesn't attempt real OCR/ML, Login.gov/ID.me, or integration with BGS/MMS/MAS/BPDS — see the design doc for the full list.",
+  },
+  {
+    selector: '[data-tour="capabilities"]',
+    title: "Four capability areas",
+    body: "Each card maps directly to a PWS capability: the Lifestage forms experience, extraction & validation, third-party routing, and data governance & observability. Click through any of them, or continue with Start application below.",
+  },
+  {
+    selector: '[data-tour="cta"]',
+    title: "Start the interview",
+    body: "This is the same interview a claimant would use — it has its own \"Take the tour\" once you're in it, walking through evidence upload, physician routing, and review & submit.",
+  },
+  {
+    selector: '[data-tour="nav-under-the-hood"]',
+    title: "Under the hood",
+    body: "Curious how the platform itself is built and operated — not the claimant-facing demo, but the actual auth flow, data validation, live error handling, and a real production incident? That's a separate self-serve page, linked in the nav above.",
+  },
+];
+
 export default function LandingPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-3xl font-bold text-[color:var(--color-navy)]">
-        Lifestage Benefits Optimization
-      </h1>
-      <p className="mt-4 max-w-2xl text-[color:var(--color-muted)]">
-        A working proof-of-concept for VA-26-00077490 spanning the Lifestage
-        forms experience, document services extraction and validation, and
-        secure third-party routing — one claimant journey, one underlying
-        record.
-      </p>
+      <div
+        data-tour="hero"
+        className="flex flex-wrap items-start justify-between gap-4"
+      >
+        <div>
+          <h1 className="text-3xl font-bold text-[color:var(--color-navy)]">
+            Lifestage Benefits Optimization
+          </h1>
+          <p className="mt-4 max-w-2xl text-[color:var(--color-muted)]">
+            A working proof-of-concept for VA-26-00077490 spanning the Lifestage
+            forms experience, document services extraction and validation, and
+            secure third-party routing — one claimant journey, one underlying
+            record.
+          </p>
+        </div>
+        <TourLauncher steps={TOUR_STEPS} />
+      </div>
 
-      <div className="mt-6 rounded border border-dashed border-[color:var(--color-blue)] bg-[color:var(--color-blue-light)]/40 p-4 text-sm text-[color:var(--color-navy)]">
+      <div
+        data-tour="disclaimer"
+        className="mt-6 rounded border border-dashed border-[color:var(--color-blue)] bg-[color:var(--color-blue-light)]/40 p-4 text-sm text-[color:var(--color-navy)]"
+      >
         This demo is a design and delivery-capability proof-of-concept built
         by Ad Hoc, not a VA.gov production system. See{" "}
         <span className="font-semibold">Data governance &amp; observability</span>{" "}
@@ -50,7 +90,7 @@ export default function LandingPage() {
       <h2 className="mt-10 mb-4 text-sm font-bold uppercase tracking-wide text-[color:var(--color-muted)]">
         Capability areas demonstrated
       </h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div data-tour="capabilities" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {CAPABILITIES.map((c) => (
           <div
             key={c.title}
@@ -70,7 +110,7 @@ export default function LandingPage() {
         ))}
       </div>
 
-      <div className="mt-10">
+      <div data-tour="cta" className="mt-10">
         <LinkButton href="/apply">Start application</LinkButton>
       </div>
     </div>
