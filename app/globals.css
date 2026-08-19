@@ -69,3 +69,90 @@ body {
     background-color: transparent;
   }
 }
+
+/*
+ * Guided tour (components/guided-tour.tsx) — a highlight ring on the
+ * current target plus a fixed guide card, deliberately simple: no
+ * full-page dimming overlay or popover-arrow math, which breaks against
+ * dynamic content (a wizard step changing, a table re-rendering).
+ */
+.tour-button {
+  flex: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-blue);
+  background: #ffffff;
+  border: 1px solid var(--color-blue);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.tour-button:hover {
+  background: var(--color-blue-light);
+}
+.tour-highlight {
+  outline: 3px solid var(--color-blue);
+  outline-offset: 4px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 6px rgba(0, 94, 162, 0.18);
+  transition: box-shadow 0.2s ease;
+}
+.tour-card {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1000;
+  width: min(340px, calc(100vw - 2.5rem));
+  background: var(--color-navy);
+  color: #ffffff;
+  padding: 1.1rem 1.25rem;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.tour-progress {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-blue-light);
+}
+.tour-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+.tour-body {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #dce8f5;
+}
+.tour-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tour-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+.tour-actions button {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #ffffff;
+}
+.tour-actions .tour-next {
+  background: #ffffff;
+  color: var(--color-navy);
+  border-color: #ffffff;
+}
+.tour-actions .tour-skip {
+  border-color: transparent;
+  color: var(--color-blue-light);
+  padding-left: 0;
+}

@@ -8,6 +8,13 @@ built this way, see `README.md` and the design doc in `docs/`.
 
 **Live demo:** https://lifestage-benefits-demo.vercel.app
 
+> Every screen below has a **Take the tour** button in its top-right area.
+> Click it for a short, self-serve walkthrough that highlights the key
+> parts of that screen one at a time — a self-guided version of a
+> presenter script, useful for exploring a screen solo without someone
+> narrating it live. Use **Skip**, **Back**, or **Next** to move through
+> it, or click outside/press it again to close early.
+
 > Preview URLs (the ones posted automatically on each pull request) sit
 > behind Vercel's team sign-in and will bounce anyone outside the Ad Hoc
 > Vercel team to a Vercel login page — that's expected, not a bug. The
@@ -102,6 +109,35 @@ submission is validated against, generated directly from the Zod schemas
 in `lib/schema.ts`. If you're wondering what fields exist, what's
 required, or what a field's exact shape is, this is the source of truth —
 it cannot drift from the validation code because it's generated from it.
+
+## 5. Anyone: under the hood
+
+`/under-the-hood` (no sign-in required, linked from the site header) is a
+live technical walkthrough of how the app is actually built, for anyone
+curious what's real versus mocked. It's a single linear page — no
+"Take the tour" button here, since the page is already written top to
+bottom as its own guided explanation. Five sections:
+
+1. **Architecture + live status** — a diagram of the real stack (Next.js,
+   Zod, Postgres/Neon, the trace-event log, Vercel) alongside live tiles
+   showing whether the configured environment variables, database
+   connection, and deployment info are actually present right now.
+2. **Two annotated flow write-ups** — how a submission is created and
+   validated, and how routing/third-party completion works, each tied to
+   the actual file and API route that implements it.
+3. **Try the extraction code path live** — pick a document type and click
+   **Run extraction** to call the exact same mock-extraction function
+   (`lib/extract.ts`) the real interview's evidence-upload step uses, and
+   see the raw JSON response.
+4. **Errors, live** — two buttons that call the real API with a
+   deliberately unauthenticated request and a deliberately invalid
+   third-party token, showing the actual error response each produces —
+   plus a real production incident (a `Promise.all` database race
+   condition), with the actual before/after code diff and a link to the
+   full write-up in `LESSONS_LEARNED.md`.
+5. **Live status, re-checkable** — the same status tiles as section 1,
+   with a **Re-check now** button to refresh them without reloading the
+   page.
 
 ## Troubleshooting
 

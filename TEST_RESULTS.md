@@ -8,9 +8,9 @@ rather than adding a new one for the same test.
 
 | Check | Result | Date | Notes |
 | --- | --- | --- | --- |
-| `npm run lint` | ✅ Pass | 2026-08-19 | No errors or warnings. |
-| `npm run build` | ✅ Pass | 2026-08-19 | Compiles, type-checks, and statically generates `/`, `/apply`, `/schema` (`_not-found`) with no errors. |
-| `npm run test:a11y` | ✅ Pass (4/4) | 2026-08-19 | All four pages (`/`, `/apply`, `/schema`, `/third-party/invalid-token`) clean against WCAG 2.1 A/AA via axe-core. Ran with `PLAYWRIGHT_CHROMIUM_PATH` pointed at the environment's installed Chromium. Build/start logs show `MissingSecret` auth errors during the run — expected, since `AUTH_SECRET` isn't set in this environment and none of the scanned pages touch auth. |
+| `npm run lint` | ✅ Pass | 2026-08-19 | 0 errors, 3 pre-existing `no-img-element` warnings in `gov-banner.tsx` (unrelated to this change). |
+| `npm run build` | ✅ Pass | 2026-08-19 | Compiles, type-checks, and statically generates `/`, `/apply`, `/schema`, `/under-the-hood` (`_not-found`) with no errors; `/under-the-hood`'s two new API routes (`/api/status`, `/api/demo/extract-preview`) build as dynamic routes alongside the existing ones. |
+| `npm run test:a11y` | ✅ Pass (5/5) | 2026-08-19 | All five pages (`/`, `/apply`, `/schema`, `/third-party/invalid-token`, `/under-the-hood`) clean against WCAG 2.1 A/AA via axe-core, including the new tour buttons and the `/under-the-hood` page's live-status tiles, extraction-preview form, and error-demo buttons. Ran with `PLAYWRIGHT_CHROMIUM_PATH` pointed at the environment's installed Chromium. |
 
 ## 1. Claimant / Veteran interview
 
@@ -49,7 +49,31 @@ rather than adding a new one for the same test.
 | `/schema` matches `lib/schema.ts` | ✅ Pass (build-time) | 2026-08-19 | Page statically generated successfully in `npm run build`; it's derived directly from the Zod schema so it can't drift independently. |
 | Keyboard access to schema block | ✅ Pass | 2026-08-19 | Covered by `test:a11y`. |
 
-## 5. Deployment / environment
+## 5. Guided tours
+
+| Test | Result | Date | Notes |
+| --- | --- | --- | --- |
+| Landing page tour (hero → disclaimer → capabilities → CTA → nav link) | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified: tour card opens, "STEP 1 OF 5," highlights the hero correctly; stepped through to step 2 cleanly. |
+| Wizard tour jump to evidence-upload (step 5 of 7) | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified: wizard actually navigated to step 5, upload buttons highlighted, tour card correctly reads "STEP 3 OF 5 Evidence upload & extraction." Confirms tour state living in the parent `ApplyWizard` (not per-step components) works across the unmount/remount boundary. |
+| Wizard tour jump past evidence/routing without an existing draft | Not separately verified | — | `jumpToStep`'s fire-and-forget `persist({})` wasn't isolated in a dedicated test this pass; covered incidentally by the full step-through smoke run completing without error. |
+| Physician portal and dashboard tours | Not run here | — | Dashboard tour needs a signed-in Google session (not available in this environment); physician portal tour needs a freshly generated `/third-party/<token>` link — both are manual checks for a human with real credentials. |
+| Schema page tour | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Tour card opens and highlights the hero/data-dictionary block as expected. |
+| Tour respects `prefers-reduced-motion` | Not run here | — | Requires manually toggling OS/browser reduced-motion setting; not exercised by the automated or smoke-test pass. |
+| `/under-the-hood` has no tour button | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Confirmed no **Take the tour** button renders on the page. |
+
+## 6. `/under-the-hood` live demonstration page
+
+| Test | Result | Date | Notes |
+| --- | --- | --- | --- |
+| `GET /api/status` reports real env/DB/deployment state | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | In this environment (no `DATABASE_URL`/auth env vars set), all tiles correctly showed "not set"/unreachable in red — confirms it reads real `process.env` state, not hardcoded values. |
+| Extraction preview calls the real mock-extraction function | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Selected "Marriage certificate," clicked **Run extraction**, got real mock JSON (`spouseFirstName: "Maria"`, `confidence: 0.97`, `status: "accepted"`) matching the same function the real wizard uses. |
+| `POST /api/demo/extract-preview` is safe and side-effect-free | Not separately verified | — | No submission/trace record creation was checked directly against the store; the route's implementation takes no submission id and only calls the pure `mockExtractFields` function, so this is verified by code inspection rather than a runtime check this pass. |
+| "Call the submissions API with no session" button shows the real 401 | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified real `{"error":"Unauthorized"}` response with contextual explanation referencing the SSN-leak incident below. |
+| "Fetch an invalid third-party token" button shows the real 404 | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified. |
+| Incident case study renders the real diff and links to `LESSONS_LEARNED.md` | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified: the `Promise.all` → sequential-chain diff and the `LESSONS_LEARNED.md` link both render correctly at the bottom of the page. |
+| "Re-check now" refreshes status tiles without a full page reload | Not run here | — | Manual check; not exercised by the smoke script. |
+
+## 7. Deployment / environment
 
 | Test | Result | Date | Notes |
 | --- | --- | --- | --- |

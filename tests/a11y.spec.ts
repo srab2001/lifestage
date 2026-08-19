@@ -6,7 +6,7 @@ import AxeBuilder from "@axe-core/playwright";
 // token-gated (/third-party/[token] with a valid token) pages need a real
 // session or submission to reach, so they're out of scope for this static
 // check — this covers what every visitor can reach unauthenticated.
-const PAGES = ["/", "/apply", "/schema", "/third-party/invalid-token"];
+const PAGES = ["/", "/apply", "/schema", "/third-party/invalid-token", "/under-the-hood"];
 
 for (const path of PAGES) {
   test(`${path} has no automatically detectable accessibility violations`, async ({

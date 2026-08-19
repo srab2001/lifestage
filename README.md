@@ -31,6 +31,8 @@ approximation of one.
 | Public physician portal (single-use link) | `app/third-party/[token]` |
 | Confirmation | `app/(main)/confirmation/[id]` |
 | Staff observability dashboard (Google-auth gated) | `app/(main)/dashboard` |
+| Guided "Take the tour" walkthroughs (landing, wizard, physician portal, dashboard, schema) | `components/guided-tour.tsx` |
+| Live "under the hood" technical demo page | `app/(main)/under-the-hood`, `components/under-the-hood.tsx` |
 | Google auth (Auth.js v5) | `auth.ts`, `proxy.ts` |
 | API routes | `app/api/*` |
 | USWDS-based UI primitives (button, input, alert, tag) | `components/ui.tsx` |
@@ -141,6 +143,24 @@ not just importing the precompiled CSS this project uses). Close, not
 identical — see `LESSONS_LEARNED.md` for the specifics found integrating
 it.
 
+## Guided tours and the "under the hood" page
+
+Every demonstration screen (landing page, the 7-step Lifestage interview,
+the physician portal, the staff dashboard, and the schema page) has a
+self-serve **Take the tour** button (`components/guided-tour.tsx`) that
+highlights the key parts of that screen in sequence — a self-guided
+version of a presenter script. `/under-the-hood` is a separate, linear
+page (no tour button of its own) that shows how the app is actually built:
+a live architecture diagram, real environment/database/deployment status
+pulled from `/api/status`, the real mock-extraction code path exercised
+live via `/api/demo/extract-preview`, two live error-demo buttons hitting
+the real API, and a real production incident (the `Promise.all` DDL race
+documented in `LESSONS_LEARNED.md`) as a case study. Both patterns were
+adapted from a similar internal demo (`raven_demo`)'s "GuidedTour" and
+"how it's built" pages, rebuilt against this app's own architecture and
+its own two recorded incidents rather than reused as-is. See
+`USER_GUIDE.md` for what each tour and the `/under-the-hood` page cover.
+
 ## CI
 
 `.github/workflows/ci.yml` runs two jobs on every pull request and push to
@@ -149,9 +169,10 @@ it.
 - `lint-and-build` — `npm run lint` and `npm run build`.
 - `accessibility` — `npm run test:a11y`, an automated WCAG 2.0/2.1 A/AA
   sweep (Playwright + axe-core, see `tests/a11y.spec.ts`) across the pages
-  every visitor can reach unauthenticated (`/`, `/apply`, `/schema`, and the
-  third-party portal's invalid-link state). Auth-gated and token-gated pages
-  aren't covered by this static check — see `LESSONS_LEARNED.md`.
+  every visitor can reach unauthenticated (`/`, `/apply`, `/schema`,
+  `/under-the-hood`, and the third-party portal's invalid-link state).
+  Auth-gated and token-gated pages aren't covered by this static check —
+  see `LESSONS_LEARNED.md`.
 
 Locally: `npm run test:a11y` (needs Playwright's Chromium —
 `npx playwright install chromium` once, or point `PLAYWRIGHT_CHROMIUM_PATH`

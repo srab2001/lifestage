@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui";
+import { TourLauncher, type TourStep } from "@/components/guided-tour";
 import { WizardShell, WIZARD_STEPS } from "./wizard-shell";
 import { VeteranStep } from "./veteran-step";
 import { ClaimantStep } from "./claimant-step";
@@ -101,6 +102,48 @@ export function ApplyWizard() {
     }
   }
 
+  function jumpToStep(index: number) {
+    // Evidence and routing need a draft submission to exist — created here
+    // if the tour jumps straight there without walking step 1 first. Fired
+    // without awaiting (TourStep.beforeShow is synchronous): the step's
+    // upload/send controls are simply disabled for the moment it takes to
+    // resolve, same as they would be on a slow connection.
+    if (index >= 4 && !submissionId) persist({});
+    setStepIndex(index);
+  }
+
+  const TOUR_STEPS: TourStep[] = [
+    {
+      selector: '[data-tour="wizard-step-0"]',
+      title: "The Lifestage interview",
+      body: "Seven steps, saved as you go. This tour jumps between them to show what each one demonstrates — Back/Continue still work normally once you're exploring on your own.",
+    },
+    {
+      selector: '[data-tour="wizard-step-2"]',
+      title: "Dependents",
+      body: "Add or remove dependents inline, right here in the interview — each one asks whether they have a Social Security number.",
+      beforeShow: () => jumpToStep(2),
+    },
+    {
+      selector: '[data-tour="evidence-upload"]',
+      title: "Evidence upload & extraction",
+      body: "Upload any file and watch it come back as a table of extracted fields with confidence scores — a deterministic mock standing in for real AI/OCR, but the review-and-correct interaction is real. Try uploading one after the tour.",
+      beforeShow: () => jumpToStep(4),
+    },
+    {
+      selector: '[data-tour="routing-send"]',
+      title: "Secure third-party routing",
+      body: "This issues a real single-use link a physician could use to complete VA Form 21-2680 with no account — try clicking it after the tour to see the physician's side.",
+      beforeShow: () => jumpToStep(5),
+    },
+    {
+      selector: '[data-tour="wizard-step-6"]',
+      title: "Review & submit",
+      body: "A read-only summary before the record is finalized. Submitting takes you to a confirmation page — and this claim immediately shows up on the staff dashboard's transaction trace.",
+      beforeShow: () => jumpToStep(6),
+    },
+  ];
+
   const reviewSubmission: Submission = {
     ...emptySubmissionView(),
     id: submissionId ?? "",
@@ -114,8 +157,12 @@ export function ApplyWizard() {
 
   return (
     <div>
+      <div className="mx-auto flex max-w-2xl justify-end px-6 pt-4">
+        <TourLauncher steps={TOUR_STEPS} />
+      </div>
+
       {error && (
-        <div className="mx-auto max-w-2xl px-6 pt-6">
+        <div className="mx-auto max-w-2xl px-6 pt-2">
           <Alert type="error">{error}</Alert>
         </div>
       )}
@@ -123,6 +170,7 @@ export function ApplyWizard() {
       {stepIndex === 0 && (
         <WizardShell
           stepIndex={0}
+          tourId="wizard-step-0"
           title="Veteran information"
           hint="This information supports Pension, burial, and dependents-management forms (21P-527EZ, 21P-530EZ, 21-686c)."
           showBack={false}
@@ -147,6 +195,7 @@ export function ApplyWizard() {
       {stepIndex === 2 && (
         <WizardShell
           stepIndex={2}
+          tourId="wizard-step-2"
           title="Dependents"
           hint="Add any dependents whose status needs to be reported or updated."
           onBack={goBack}
@@ -221,6 +270,7 @@ export function ApplyWizard() {
       {stepIndex === 6 && (
         <WizardShell
           stepIndex={6}
+          tourId="wizard-step-6"
           title="Review & submit"
           onBack={goBack}
           onContinue={handleSubmit}

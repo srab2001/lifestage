@@ -12,6 +12,7 @@ export const WIZARD_STEPS = [
 
 export function WizardShell({
   stepIndex,
+  tourId,
   title,
   hint,
   children,
@@ -22,6 +23,12 @@ export function WizardShell({
   showBack = true,
 }: {
   stepIndex: number;
+  /** data-tour id for this step's root, so a guided tour running in the
+   * parent (ApplyWizard) can jump here and highlight it — kept on the
+   * parent rather than this component, since each step's WizardShell
+   * unmounts and remounts on step change and can't hold tour state
+   * itself. */
+  tourId?: string;
   title: string;
   hint?: string;
   children: React.ReactNode;
@@ -32,7 +39,7 @@ export function WizardShell({
   showBack?: boolean;
 }) {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
+    <div className="mx-auto max-w-2xl px-6 py-10" data-tour={tourId}>
       <div
         className="usa-step-indicator usa-step-indicator--no-labels usa-step-indicator--counters-sm"
         aria-label="Lifestage interview progress"
