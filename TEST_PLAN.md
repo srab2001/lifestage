@@ -40,7 +40,8 @@ and re-run all three after any fix, not just the one that failed.
 
 | What to test | How | Priority |
 | --- | --- | --- |
-| Google auth gate restricts to `@adhocteam.us` | Manual: attempt sign-in with a non-`adhocteam.us` Google account; confirm rejection (see `auth.ts` `signIn` callback). Requires a real OAuth app — not covered by the automated a11y pass. | Smoke |
+| Google auth gate restricts to `@adhocteam.us` (or `ADMIN_EMAILS` when set) | Manual: attempt sign-in with a non-`adhocteam.us` Google account; confirm rejection (see `auth.ts` `signIn` callback). Requires a real OAuth app — not covered by the automated a11y pass. | Smoke |
+| A real Google account can complete sign-in at all | Manual: with `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` set in Vercel, click through Google's consent screen from `/dashboard`'s redirect and confirm it lands back on `/dashboard` signed in — not a Google-side "Error 401: invalid_client". This checks the provider is actually wired to those env var names, not just that credentials exist somewhere. Regressed once, see `LESSONS_LEARNED.md`. | Smoke — regression |
 | Six live metrics render and match store state | Manual: cross-check totals/averages shown against the number of records actually created. | Regression |
 | Claims list → detail → transaction trace | Manual: click a row, confirm the trace lists intake/extraction/routing/validation/submission events in order with timestamps. | Smoke |
 | Dashboard reflects new data without a live push | Manual: create or update a submission in another tab, then reload the dashboard tab — must show the new state (no auto-push is expected). | Edge case |

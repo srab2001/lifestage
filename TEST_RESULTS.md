@@ -36,7 +36,8 @@ rather than adding a new one for the same test.
 
 | Test | Result | Date | Notes |
 | --- | --- | --- | --- |
-| Google auth gate (`@adhocteam.us` only) | Not run here | — | Requires a real OAuth app/credentials; not available in this environment. |
+| Google auth gate (`@adhocteam.us` only, or `ADMIN_EMAILS`) | Not run here | — | Requires a real OAuth app/credentials; not available in this environment. |
+| A real Google account can complete sign-in | ❌ Failed in production, fixed | 2026-08-19 | Found live: Google returned "Error 401: invalid_client" before reaching this app. Root cause was code, not Google Console config — `auth.ts` relied on Auth.js v5's automatic `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` inference while the docs instructed `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, so the provider never read the configured credentials. Fixed by wiring `clientId`/`clientSecret` explicitly; see `LESSONS_LEARNED.md`. End-to-end sign-in with a real account still needs a human to confirm post-fix — not verifiable from this environment. |
 | Six live metrics accuracy | Not run here | — | Manual check against store data. |
 | Claims list → detail → trace | Not run here | — | Manual check. |
 | Dashboard reflects new data on reload | Not run here | — | Manual check. |

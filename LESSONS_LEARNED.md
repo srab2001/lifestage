@@ -50,6 +50,27 @@ under different run modes:
   including Next's automatic `<Link>` prefetching of the dashboard nav
   item from *every other page*, so the error shows up on pages that have
   nothing to do with auth. Fixed with an explicit `trustHost: true`.
+- **The bare `Google` provider silently reads the wrong env var names.**
+  `providers: [Google]` (no explicit config) relies on Auth.js v5's
+  automatic environment inference, which expects `AUTH_GOOGLE_ID` /
+  `AUTH_GOOGLE_SECRET`. This repo's own `.env.example` and README
+  instruct setting `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` instead —
+  a legacy-feeling but common naming choice that Auth.js v5 doesn't
+  auto-detect. The mismatch produces no error anywhere in this app: it
+  sends Google an empty `client_id`, and the failure — "Error 401:
+  invalid_client / The OAuth client was not found" — happens entirely on
+  Google's own consent screen before the request ever reaches this
+  app's code or logs. A real user hit this in production; it looked
+  exactly like a Google Cloud Console misconfiguration (wrong/deleted
+  OAuth client) right up until checking `auth.ts` against Auth.js v5's
+  actual env-var convention. **Fixed by wiring `clientId`/`clientSecret`
+  explicitly** (`Google({ clientId: process.env.GOOGLE_CLIENT_ID, ... })`)
+  rather than renaming the already-documented, already-configured Vercel
+  env vars. Lesson: when a provider "just reads env vars," verify which
+  names it actually reads before writing docs that tell people to set
+  different ones — and remember that OAuth failures on the provider's
+  own consent screen are invisible to your own application's logging,
+  so "no errors in Vercel" doesn't mean auth is working.
 
 ## Schema-first validation works — including finding the UI's own bugs
 

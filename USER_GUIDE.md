@@ -71,7 +71,10 @@ Clicking **Submit & e-sign** finalizes it. The link:
 
 `/dashboard` requires signing in with a Google account on the
 `adhocteam.us` domain (see design doc Section 8 for why Google, and why
-only that domain — this is not the Veteran-facing identity system). If
+only that domain — this is not the Veteran-facing identity system). An
+operator can instead restrict access to a specific named list of people
+via the `ADMIN_EMAILS` environment variable (see `README.md`), in which
+case only those exact addresses can sign in, regardless of domain. If
 you're not signed in, you'll be redirected to a Google sign-in page
 automatically; sign back out with the link in the dashboard's top-right
 corner when you're done.
@@ -106,5 +109,6 @@ it cannot drift from the validation code because it's generated from it.
 | --- | --- |
 | A step won't advance and shows a red error banner | The error banner now shows the specific validation failure (e.g. "dependents.0.dateOfBirth: Date of birth is required") — fix that field and continue. |
 | Physician's link shows "Link not found or expired" | Either it was already submitted once, or more than 7 days passed since it was issued. Go back to the interview and issue a new one. |
-| `/dashboard` redirects to a Google sign-in you can't get past | Your Google account isn't on the `adhocteam.us` domain — the `signIn` callback in `auth.ts` rejects everything else by design. |
+| `/dashboard` redirects to a Google sign-in you can't get past | Your Google account isn't on the `adhocteam.us` domain (or, if `ADMIN_EMAILS` is set, isn't on that exact list) — the `signIn` callback in `auth.ts` rejects everything else by design. |
+| Google itself shows "Access blocked: Authorization Error / Error 401: invalid_client" before you even see an account picker | This is an app configuration problem, not your account — the deployed app isn't correctly passing its Google OAuth credentials, so Google doesn't recognize the request at all. It's not something a claimant, physician, or staff member can fix on their end; report it so `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` wiring in `auth.ts` and Vercel can be checked (see `LESSONS_LEARNED.md`). |
 | A preview URL (from a pull request) shows a Vercel login page instead of the app | Expected — preview deployments require Vercel team membership. Use the production URL to share the demo outside the team, or ask to be added to the Vercel team to view previews. |
