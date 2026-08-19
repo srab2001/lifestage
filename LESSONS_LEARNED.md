@@ -124,6 +124,71 @@ obvious from the settings API response alone and is worth checking with a
 real unauthenticated request (not just a tool that has standing access)
 before telling anyone a link is externally shareable.
 
+## Promise.all is not "run these in order" — a real production incident
+
+The lazy schema-init fix above (idempotent `CREATE TABLE IF NOT EXISTS` on
+first query) shipped with its own bug: the four DDL statements ran via
+`Promise.all(INIT_STATEMENTS.map(s => pool.query(s)))`. That fires all
+four concurrently, and the `pg` `Pool` hands out a separate connection per
+`.query()` call — so there's no ordering guarantee between statements
+dispatched to different connections. Two of the four statements have real
+dependencies (`third_party_requests` references `submissions(id)`; the
+`trace_events` index needs `trace_events` to already exist), and in
+production this raced: a real user hit
+`error: relation "trace_events" does not exist` while submitting the
+interview, minutes after the fix that was supposed to prevent exactly
+that class of error. Fixed by folding the statements into a sequential
+promise chain instead. Lesson: `Promise.all` over independent connections
+is a "run these, I don't care about order" primitive — reach for it only
+when the operations are genuinely order-independent, which schema DDL
+with foreign keys and dependent indexes is not. A live user exercising
+the exact code path within minutes of deploy is also a good reminder that
+"passed lint and build" is not the same claim as "correct under
+concurrency."
+
+## Integrating a real design system: USWDS
+
+Moving from an approximated "VA.gov-inspired" palette to the actual
+[USWDS](https://designsystem.digital.gov/) component library
+(`@uswds/uswds`) surfaced a few integration specifics:
+
+- **The npm package's `exports` map is stricter than the folder
+  structure suggests.** `@uswds/uswds/dist/css/uswds.css` looks like a
+  valid path (the file is right there) but fails to resolve under
+  Node's `exports` conditions; the package only exposes it via
+  `@uswds/uswds/css/uswds.css` (mapped through a `"./css/*"` export).
+  Same idea for JS. Check the `exports` field, not the directory
+  listing, before assuming an import path.
+- **Turbopack resolves and bundles CSS `url()` references against
+  `node_modules` automatically** — every font and background-image
+  reference inside USWDS's compiled CSS just worked once the CSS import
+  itself resolved, with zero manual asset copying. Assets referenced
+  directly from *our own JSX* (`<img src="...">`, the banner's flag/lock
+  icons) still needed manually copying into `public/`, since those never
+  go through the CSS pipeline that does the automatic resolution.
+- **A brand color override can lose to a component's own CSS on
+  specificity, not source order.** After importing USWDS after Tailwind
+  (so our overrides should win on equal specificity), the header nav
+  links still rendered in USWDS's default gray instead of white —
+  axe-core's accessibility check caught the resulting contrast failure
+  immediately (2.01:1 against a 4.5:1 requirement). The actual USWDS
+  selector, `.usa-nav__primary > .usa-nav__primary-item > a`, is one
+  compound selector more specific than the two-class override we'd
+  written, so it won despite loading later in the cascade. Fixed by
+  matching that selector's shape (plus `!important` as a deliberate,
+  documented exception, since several pseudo-state variants all needed
+  covering consistently). Lesson: when a color override doesn't take on
+  a real component library, check specificity before assuming import
+  order will save you — and let an automated contrast checker catch it
+  either way, because this is exactly the kind of regression that looks
+  fine to the eye at a glance (navy-on-navy at low opacity vs. the actual
+  gray was subtle in a screenshot) and fails hard for anyone with low
+  vision.
+- **The mobile off-canvas nav panel is real, unmodified USWDS
+  behavior** — no backdrop/scrim dimming the rest of the page while
+  open, position\:fixed at 15rem wide. It looked like a layout bug on
+  first screenshot; it isn't one we introduced.
+
 ## Process: don't stack new work on an already-merged PR's branch
 
 Once a PR merges, its source branch is finished — pushing new commits

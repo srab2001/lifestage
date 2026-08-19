@@ -1,17 +1,26 @@
 @import "tailwindcss";
+@import "@uswds/uswds/css/uswds.css";
 
+/*
+ * Color tokens snapped to USWDS's default "blue" theme values (the design
+ * system VA.gov is built on — see design doc Section 10) rather than
+ * hand-picked hex codes, so every existing var(--color-*) usage across the
+ * app inherits the real USWDS palette without touching each call site.
+ * Component-level USWDS classes (usa-button, usa-input, etc.) are layered
+ * in separately in components/ui.tsx, site-header.tsx, and site-footer.tsx.
+ */
 :root {
-  --color-navy: #112e51;
-  --color-navy-dark: #0b1f38;
-  --color-blue: #205493;
-  --color-blue-light: #cfe8ff;
-  --color-ink: #1b1b1b;
-  --color-muted: #5b616b;
-  --color-border: #d6d7d9;
-  --color-bg: #f1f1f1;
-  --color-success: #2e8540;
-  --color-warning: #c07c00;
-  --color-danger: #cd2026;
+  --color-navy: #162e51; /* USWDS primary-darker */
+  --color-navy-dark: #0f1b2d; /* USWDS ink */
+  --color-blue: #005ea2; /* USWDS primary */
+  --color-blue-light: #d9e8f6; /* USWDS primary-lighter */
+  --color-ink: #1b1b1b; /* USWDS ink */
+  --color-muted: #565c65; /* USWDS base-dark */
+  --color-border: #dfe1e2; /* USWDS base-lighter */
+  --color-bg: #f0f0f0; /* USWDS base-lightest */
+  --color-success: #008817; /* USWDS success-dark */
+  --color-warning: #e5a000; /* USWDS warning-dark */
+  --color-danger: #b50909; /* USWDS error-dark */
 }
 
 @theme inline {
@@ -24,4 +33,39 @@ body {
   background: #ffffff;
   color: var(--color-ink);
   font-family: var(--font-source-sans), Arial, Helvetica, sans-serif;
+}
+
+/*
+ * usa-header--basic defaults to dark text for its logo/nav — overridden
+ * here (after the USWDS import, so it wins the cascade) to stay legible
+ * against this app's navy brand header, on both the desktop inline nav
+ * and USWDS's own off-canvas mobile nav panel.
+ */
+.usa-header--basic .usa-logo a,
+.usa-header--basic .usa-logo a:visited {
+  color: #ffffff;
+}
+/*
+ * !important here because USWDS's own selector for this exact element —
+ * .usa-nav__primary > .usa-nav__primary-item > a — is one compound
+ * selector more specific than a plain ".usa-header--basic .usa-nav__link"
+ * override (confirmed by axe-core catching the resulting contrast
+ * failure: white-on-navy fell back to USWDS's default base-dark gray).
+ */
+.usa-header--basic .usa-nav__primary > .usa-nav__primary-item > a,
+.usa-header--basic .usa-nav__primary > .usa-nav__primary-item > a:visited {
+  color: #ffffff !important;
+}
+.usa-header--basic .usa-nav__primary > .usa-nav__primary-item > a:hover {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+.usa-header--basic .usa-menu-btn {
+  background-color: transparent;
+  color: #ffffff;
+}
+@media (min-width: 64em) {
+  .usa-header--basic .usa-nav {
+    background-color: transparent;
+  }
 }

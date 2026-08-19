@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Field, inputClass } from "@/components/ui";
+import { Alert, Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
 import type { ThirdPartyRequest } from "@/lib/schema";
 
 type LoadState =
@@ -76,9 +76,7 @@ export function PhysicianPortal({ token }: { token: string }) {
   if (state.kind === "error") {
     return (
       <div className="mx-auto max-w-xl px-6 py-12">
-        <Card>
-          <p className="text-sm text-red-700">{state.message}</p>
-        </Card>
+        <Alert type="error">{state.message}</Alert>
       </div>
     );
   }
@@ -127,7 +125,7 @@ export function PhysicianPortal({ token }: { token: string }) {
             id="clinical-findings"
             required
             rows={6}
-            className="rounded border border-[color:var(--color-border)] px-3 py-2 text-sm focus:border-[color:var(--color-blue)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-blue-light)]"
+            className={textareaClass}
             value={clinicalFindings}
             onChange={(e) => setClinicalFindings(e.target.value)}
           />
@@ -142,7 +140,7 @@ export function PhysicianPortal({ token }: { token: string }) {
           />
         </Field>
 
-        {submitError && <p className="text-sm text-red-700">{submitError}</p>}
+        {submitError && <Alert type="error">{submitError}</Alert>}
 
         <Button type="submit" disabled={submitting}>
           {submitting ? "Submitting…" : "Submit & e-sign"}

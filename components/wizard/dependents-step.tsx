@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Field, inputClass } from "@/components/ui";
+import { Button, Field, inputClass, selectClass } from "@/components/ui";
 import type { Dependent } from "@/lib/schema";
 
 const RELATIONSHIPS: { value: Dependent["relationship"]; label: string }[] = [
@@ -70,7 +70,7 @@ export function DependentsStep({
             <Field label="Relationship" htmlFor={`d-rel-${dependent.id}`}>
               <select
                 id={`d-rel-${dependent.id}`}
-                className={inputClass}
+                className={selectClass}
                 value={dependent.relationship}
                 onChange={(e) =>
                   updateDependent(dependent.id, {

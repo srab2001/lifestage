@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Button, ConfidenceBadge, inputClass } from "@/components/ui";
+import { Alert, Button, ConfidenceBadge, inputClass } from "@/components/ui";
 import type { EvidenceDocument, EvidenceExtraction } from "@/lib/schema";
 
 const UPLOAD_BUTTONS: { type: EvidenceDocument["documentType"]; label: string }[] = [
@@ -80,7 +80,11 @@ export function EvidenceStep({
             e.target.value = "";
           }}
         />
-        {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
+        {error && (
+          <div className="mt-2">
+            <Alert type="error">{error}</Alert>
+          </div>
+        )}
         <p className="mt-2 text-xs text-[color:var(--color-muted)]">
           Extraction is a deterministic mock standing in for CAVE-style AI/OCR
           — pick any file, the demo returns representative confidence scores.
