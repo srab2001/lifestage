@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
 import { TourLauncher, type TourStep } from "@/components/guided-tour";
+import { ValueCallout } from "@/components/value-callout";
 import type { ThirdPartyRequest } from "@/lib/schema";
 
 type LoadState =
@@ -128,6 +129,12 @@ export function PhysicianPortal({ token }: { token: string }) {
         </div>
         <TourLauncher steps={TOUR_STEPS} />
       </div>
+
+      <ValueCallout
+        id="value-physician-portal"
+        va="The physician's access is deliberately narrow — no VA.gov account, no reach beyond this one exam — minimizing what has to be secured and revoked to collect a single signature."
+        veteran="Their physician can complete and e-sign the exam directly, without the Veteran acting as courier for a paper form between the VA and the doctor's office."
+      />
 
       <form
         onSubmit={handleSubmit}

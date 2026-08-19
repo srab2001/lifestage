@@ -14,6 +14,11 @@ built this way, see `README.md` and the design doc in `docs/`.
 > presenter script, useful for exploring a screen solo without someone
 > narrating it live. Use **Skip**, **Back**, or **Next** to move through
 > it, or click outside/press it again to close early.
+>
+> Every screen also has a **"Why this matters"** callout box explaining
+> that specific screen's value to the VA and to the Veteran separately —
+> useful for a reviewer trying to connect a feature back to a PWS
+> capability, or for anyone wondering why a given step exists at all.
 
 > Preview URLs (the ones posted automatically on each pull request) sit
 > behind Vercel's team sign-in and will bounce anyone outside the Ad Hoc

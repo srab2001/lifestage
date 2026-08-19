@@ -1,5 +1,6 @@
 import { buildDataDictionaryJsonSchema, SCHEMA_VERSION } from "@/lib/schema";
 import { TourLauncher, type TourStep } from "@/components/guided-tour";
+import { ValueCallout } from "@/components/value-callout";
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -38,6 +39,12 @@ export default function SchemaPage() {
         </div>
         <TourLauncher steps={TOUR_STEPS} />
       </div>
+
+      <ValueCallout
+        id="value-schema"
+        va="Publishes the exact validation contract every submission is checked against, generated from code so it can't drift from what's actually enforced — closing a common gap between documented and actual data requirements."
+        veteran="A published, versioned contract for what a 'complete' claim looks like means requirements can't shift silently between when a Veteran files and when it's reviewed."
+      />
 
       <pre
         data-tour="schema-dictionary"

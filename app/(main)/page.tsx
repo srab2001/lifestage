@@ -1,5 +1,6 @@
 import { LinkButton } from "@/components/ui";
 import { TourLauncher, type TourStep } from "@/components/guided-tour";
+import { ValueCallout } from "@/components/value-callout";
 
 const CAPABILITIES = [
   {
@@ -86,6 +87,13 @@ export default function LandingPage() {
         <span className="font-semibold">Data governance &amp; observability</span>{" "}
         below for the schema and live trace log this design is built around.
       </div>
+
+      <ValueCallout
+        id="value-landing"
+        heading="Why this demo matters"
+        va="Shows PWS 2.3.2 Data Governance, secure third-party routing, and observability working end-to-end in one running system — not a slide deck — ahead of any award decision."
+        veteran="One guided intake replaces separate paper forms for Pension, burial, and dependents changes, with a status trail so a claim's progress is never a mystery."
+      />
 
       <h2 className="mt-10 mb-4 text-sm font-bold uppercase tracking-wide text-[color:var(--color-muted)]">
         Capability areas demonstrated

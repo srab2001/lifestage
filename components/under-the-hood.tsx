@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Alert, Button } from "@/components/ui";
+import { ValueCallout } from "@/components/value-callout";
 import type { EvidenceDocument } from "@/lib/schema";
 
 type StatusResponse = {
@@ -157,6 +158,11 @@ export function UnderTheHood() {
           </code>{" "}
           right now.
         </p>
+        <ValueCallout
+          id="value-uth-architecture"
+          va="Shows the actual production stack and its live configuration state — the same signals an operator would check during a real incident, not a diagram that could be stale."
+          veteran="Reliability isn't a claim here — it's something anyone can verify is actually true of the system holding their claim right now."
+        />
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <ArchBox title="Browser" detail="claimant, physician, or staff" />
           <span aria-hidden className="text-[color:var(--color-muted)]">→</span>
@@ -195,6 +201,11 @@ export function UnderTheHood() {
         <h2 className="text-lg font-bold text-[color:var(--color-navy)]">
           2. How the elements connect
         </h2>
+        <ValueCallout
+          id="value-uth-connect"
+          va="Documents exactly how identity and validation work end to end, tied to the specific PWS language (8.1.9 identity, 2.3.2 data governance) each flow answers — useful for technical review without a separate architecture document to keep current."
+          veteran="The same validation rule that stops a claimant from submitting bad data is enforced everywhere else too — a claim can't be accepted in one place and silently rejected in another."
+        />
 
         <h3 className="mt-3 text-sm font-semibold">Signing in with Google</h3>
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
@@ -246,6 +257,11 @@ export function UnderTheHood() {
           interview&apos;s evidence-upload step uses — nothing here is a
           separate fixture baked into this page.
         </p>
+        <ValueCallout
+          id="value-uth-extraction"
+          va="Lets a reviewer exercise the actual extraction code path with no test-data setup, to confirm it's not a canned demo dressed up as a live one."
+          veteran="This is the exact same confidence-scored review pattern used on their own uploaded documents in the real interview — nothing here is a separate, friendlier version."
+        />
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm">
             Document type
@@ -282,6 +298,11 @@ export function UnderTheHood() {
         <p className="mt-1 text-sm text-[color:var(--color-muted)]">
           These call the real API right now.
         </p>
+        <ValueCallout
+          id="value-uth-errors"
+          va="Shows a real production incident and its actual fix, not a hypothetical — the kind of transparency that builds trust with a technical reviewer faster than a claim of 'we test everything.'"
+          veteran="The SSN-exposure bug referenced here was found and fixed before it affected a real claimant, and that same fix — auth-gating every route — is the protection covering every Veteran's data today."
+        />
         <div className="mt-3 flex flex-wrap gap-3">
           <Button type="button" variant="secondary" onClick={callUnauthenticated}>
             Call the submissions API with no session
@@ -359,6 +380,11 @@ export function UnderTheHood() {
             Re-check now
           </Button>
         </div>
+        <ValueCallout
+          id="value-uth-live-status"
+          va="Status here is read live from the running system on every check, not a cached copy — what's shown is what's true right now, which is the standard an operational review actually needs."
+          veteran="Nothing shown on this page is stale or staged for a demo — the same reliability signals apply to the real system processing their claim."
+        />
         {status && (
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Tile

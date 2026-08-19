@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui";
 import { TourLauncher, type TourStep } from "@/components/guided-tour";
+import { ValueCallout } from "@/components/value-callout";
 import { WizardShell, WIZARD_STEPS } from "./wizard-shell";
 import { VeteranStep } from "./veteran-step";
 import { ClaimantStep } from "./claimant-step";
@@ -173,6 +174,13 @@ export function ApplyWizard() {
           tourId="wizard-step-0"
           title="Veteran information"
           hint="This information supports Pension, burial, and dependents-management forms (21P-527EZ, 21P-530EZ, 21-686c)."
+          valueCallout={
+            <ValueCallout
+              id="value-veteran-info"
+              va="One validated record feeds three related forms (21P-527EZ, 21P-530EZ, 21-686c) instead of three separately keyed paper submissions to reconcile."
+              veteran="Enter your information once instead of retyping it on a separate form for every benefit you're pursuing."
+            />
+          }
           showBack={false}
           onContinue={() => goNext({ veteran })}
         >
@@ -185,6 +193,13 @@ export function ApplyWizard() {
           stepIndex={1}
           title="Claimant information"
           hint="The person completing this application on the Veteran's behalf, if different."
+          valueCallout={
+            <ValueCallout
+              id="value-claimant-info"
+              va="Captures who's actually filing and their relationship to the Veteran up front, so review doesn't have to untangle it after submission."
+              veteran="Makes it clear from the first screen that a spouse, surviving spouse, or other representative can file on the Veteran's behalf — not just the Veteran themselves."
+            />
+          }
           onBack={goBack}
           onContinue={() => goNext({ claimant })}
         >
@@ -198,6 +213,13 @@ export function ApplyWizard() {
           tourId="wizard-step-2"
           title="Dependents"
           hint="Add any dependents whose status needs to be reported or updated."
+          valueCallout={
+            <ValueCallout
+              id="value-dependents"
+              va="Dependents are added inline against the same validated schema used everywhere else, so SSN-status and eligibility data don't need a separate reconciliation step."
+              veteran="Add, correct, or remove a dependent in a minute inline — no separate 21-686c to mail in and match up later."
+            />
+          }
           onBack={goBack}
           onContinue={() => goNext({ dependents })}
         >
@@ -209,6 +231,13 @@ export function ApplyWizard() {
         <WizardShell
           stepIndex={3}
           title="Aid & Attendance screening"
+          valueCallout={
+            <ValueCallout
+              id="value-aid-attendance"
+              va="Flags an Aid & Attendance need at first contact instead of it surfacing later as an entirely separate claim to process."
+              veteran="One extra yes/no question can surface additional benefits early, instead of a Veteran needing to know to ask about A&A and file again."
+            />
+          }
           onBack={goBack}
           onContinue={() => goNext({ aidAttendance })}
         >
@@ -224,6 +253,13 @@ export function ApplyWizard() {
           stepIndex={4}
           title="Evidence & extraction"
           hint="Upload supporting documents. Extracted fields are reviewable and correctable before they're accepted."
+          valueCallout={
+            <ValueCallout
+              id="value-evidence"
+              va="Extracted fields carry a confidence score, and anything under 85% is flagged for human review before it's accepted — automation speeds up intake without skipping the review a real claim needs."
+              veteran="Upload a document once and see exactly what was read from it, with a chance to correct it on the spot — instead of learning weeks later that a scanned form was misread."
+            />
+          }
           onBack={goBack}
           onContinue={() => goNext()}
         >
@@ -256,6 +292,13 @@ export function ApplyWizard() {
         <WizardShell
           stepIndex={5}
           title="Physician routing (optional)"
+          valueCallout={
+            <ValueCallout
+              id="value-routing"
+              va="A single-use, time-limited link lets a physician complete VA Form 21-2680 without provisioning a VA.gov account or exposing the rest of the claim — a smaller footprint to secure and audit."
+              veteran="Their physician can complete and e-sign the exam directly from a link with no account to set up, instead of the Veteran acting as courier for a paper form between two offices."
+            />
+          }
           onBack={goBack}
           onContinue={() => goNext()}
         >
@@ -272,6 +315,13 @@ export function ApplyWizard() {
           stepIndex={6}
           tourId="wizard-step-6"
           title="Review & submit"
+          valueCallout={
+            <ValueCallout
+              id="value-review"
+              va="Nothing is finalized until every prior step passes the same validated schema, and submission immediately emits a trace event — so 'submitted' always means a complete, auditable record exists."
+              veteran="Get a confirmation number the moment you submit, with a status you can trust — no wondering whether a mailed form actually arrived."
+            />
+          }
           onBack={goBack}
           onContinue={handleSubmit}
           continueLabel={submitting ? "Submitting…" : "Submit application"}

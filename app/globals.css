@@ -156,3 +156,10 @@ body {
   color: var(--color-blue-light);
   padding-left: 0;
 }
+
+.value-callout {
+  margin-top: 1.5rem;
+}
+.value-callout__row + .value-callout__row {
+  margin-top: 0.5rem;
+}

@@ -15,6 +15,7 @@ export function WizardShell({
   tourId,
   title,
   hint,
+  valueCallout,
   children,
   onBack,
   onContinue,
@@ -31,6 +32,7 @@ export function WizardShell({
   tourId?: string;
   title: string;
   hint?: string;
+  valueCallout?: React.ReactNode;
   children: React.ReactNode;
   onBack?: () => void;
   onContinue?: () => void;
@@ -82,6 +84,8 @@ export function WizardShell({
       </div>
 
       {hint && <p className="mt-2 text-sm text-[color:var(--color-muted)]">{hint}</p>}
+
+      {valueCallout}
 
       <div className="mt-6 border border-[color:var(--color-border)] p-6">
         {children}
