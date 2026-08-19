@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { INIT_STATEMENTS } from "./db-schema.mjs";
 import type {
   Submission,
   SubmissionInput,
@@ -224,11 +225,26 @@ class InMemoryStore implements Store {
 }
 
 class PostgresStore implements Store {
-  constructor(private pool: import("pg").Pool) {}
+  private schemaReady: Promise<unknown>;
+
+  constructor(private pool: import("pg").Pool) {
+    // Lazily, idempotently ensure tables exist before the first query on a
+    // fresh Neon branch — `npm run db:init` remains available for manual/CI
+    // use, but production should never 500 just because that step was
+    // skipped ("nothing fails silently" — see design doc Section 2.1).
+    this.schemaReady = Promise.all(
+      INIT_STATEMENTS.map((statement) => this.pool.query(statement)),
+    );
+  }
+
+  private async query(text: string, params?: unknown[]) {
+    await this.schemaReady;
+    return this.pool.query(text, params);
+  }
 
   async createSubmission(input: SubmissionInput): Promise<Submission> {
     const submission = mergeSubmission(emptySubmission(randomUUID()), input);
-    await this.pool.query(
+    await this.query(
       `insert into submissions (id, data, created_at, updated_at) values ($1, $2, $3, $4)`,
       [submission.id, submission, submission.createdAt, submission.updatedAt],
     );
@@ -236,7 +252,7 @@ class PostgresStore implements Store {
   }
 
   async getSubmission(id: string) {
-    const { rows } = await this.pool.query(
+    const { rows } = await this.query(
       `select data from submissions where id = $1`,
       [id],
     );
@@ -247,7 +263,7 @@ class PostgresStore implements Store {
     const existing = await this.getSubmission(id);
     if (!existing) return undefined;
     const updated = mergeSubmission(existing, patch);
-    await this.pool.query(
+    await this.query(
       `update submissions set data = $2, updated_at = $3 where id = $1`,
       [id, updated, updated.updatedAt],
     );
@@ -255,7 +271,7 @@ class PostgresStore implements Store {
   }
 
   async listSubmissions() {
-    const { rows } = await this.pool.query(
+    const { rows } = await this.query(
       `select data from submissions order by created_at desc`,
     );
     return rows.map((r) => r.data as Submission);
@@ -271,14 +287,14 @@ class PostgresStore implements Store {
       createdAt: nowIso(),
       expiresAt: new Date(Date.now() + THIRD_PARTY_TOKEN_TTL_MS).toISOString(),
     };
-    await this.pool.query(
+    await this.query(
       `insert into third_party_requests (id, token, submission_id, data) values ($1, $2, $3, $4)`,
       [request.id, request.token, submissionId, request],
     );
     await this.updateSubmission(submissionId, {
       status: "pending_third_party",
     });
-    await this.pool.query(
+    await this.query(
       `update submissions set data = jsonb_set(data, '{thirdPartyRequestId}', to_jsonb($2::text)) where id = $1`,
       [submissionId, request.id],
     );
@@ -286,7 +302,7 @@ class PostgresStore implements Store {
   }
 
   async getThirdPartyRequestByToken(token: string) {
-    const { rows } = await this.pool.query(
+    const { rows } = await this.query(
       `select data from third_party_requests where token = $1`,
       [token],
     );
@@ -297,7 +313,7 @@ class PostgresStore implements Store {
     const request = await this.getThirdPartyRequestByToken(token);
     if (!request || request.status !== "sent") return request;
     const updated: ThirdPartyRequest = { ...request, status: "opened" };
-    await this.pool.query(
+    await this.query(
       `update third_party_requests set data = $2 where token = $1`,
       [token, updated],
     );
@@ -316,7 +332,7 @@ class PostgresStore implements Store {
       status: "completed",
       completedAt: nowIso(),
     };
-    await this.pool.query(
+    await this.query(
       `update third_party_requests set data = $2 where token = $1`,
       [token, updated],
     );
@@ -331,7 +347,7 @@ class PostgresStore implements Store {
       message,
       createdAt: nowIso(),
     };
-    await this.pool.query(
+    await this.query(
       `insert into trace_events (id, submission_id, step, message, created_at) values ($1, $2, $3, $4, $5)`,
       [event.id, event.submissionId, event.step, event.message, event.createdAt],
     );
@@ -340,11 +356,11 @@ class PostgresStore implements Store {
 
   async listTraceEvents(submissionId?: string) {
     const { rows } = submissionId
-      ? await this.pool.query(
+      ? await this.query(
           `select id, submission_id as "submissionId", step, message, created_at as "createdAt" from trace_events where submission_id = $1 order by created_at desc`,
           [submissionId],
         )
-      : await this.pool.query(
+      : await this.query(
           `select id, submission_id as "submissionId", step, message, created_at as "createdAt" from trace_events order by created_at desc`,
         );
     return rows.map((r) => ({
@@ -356,9 +372,9 @@ class PostgresStore implements Store {
   async getMetrics() {
     const [submissions, thirdParty, traceEvents] = await Promise.all([
       this.listSubmissions(),
-      this.pool
-        .query(`select data from third_party_requests`)
-        .then((r) => r.rows.map((row) => row.data as ThirdPartyRequest)),
+      this.query(`select data from third_party_requests`).then((r) =>
+        r.rows.map((row) => row.data as ThirdPartyRequest),
+      ),
       this.listTraceEvents(),
     ]);
     return computeMetrics(submissions, thirdParty, traceEvents);
