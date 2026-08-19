@@ -34,7 +34,19 @@ const devFallbackSecret =
   process.env.NODE_ENV === "production" ? undefined : "lifestage-dev-only-insecure-secret";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Google],
+  // Auth.js v5's automatic env-var inference expects AUTH_GOOGLE_ID /
+  // AUTH_GOOGLE_SECRET, not the GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
+  // names used throughout this repo's docs and .env.example — wired
+  // explicitly here so those names actually take effect. Getting this
+  // wrong doesn't error locally; it silently sends Google an empty
+  // client_id, which surfaces as "OAuth client was not found" on
+  // Google's own consent screen, not in this app's logs.
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+  ],
   secret: process.env.AUTH_SECRET ?? devFallbackSecret,
   // Vercel deployments are trusted automatically; this covers `npm run
   // start` and any non-Vercel host so the proxy's session lookup doesn't
