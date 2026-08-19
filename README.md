@@ -73,11 +73,16 @@ OAuth consent screens and account creation require a human in the browser.
 
    Google OAuth here is a pragmatic way to restrict who can reach the
    shared staff dashboard during development and review — a small, known
-   set of Ad Hoc and VA reviewer accounts (see `auth.ts`, restricted to
-   `@adhocteam.us`). It is **not** a proposal to use Google as the
-   Veteran-facing identity provider — production VA.gov authentication
-   runs through Login.gov/ID.me and VA's ICN-based identity model
-   (PWS 8.1.9).
+   set of Ad Hoc and VA reviewer accounts. It is **not** a proposal to use
+   Google as the Veteran-facing identity provider — production VA.gov
+   authentication runs through Login.gov/ID.me and VA's ICN-based identity
+   model (PWS 8.1.9).
+
+   By default (see `auth.ts`), any `@adhocteam.us` account can sign in. To
+   restrict access to a specific named list of people instead — regardless
+   of domain — set `ADMIN_EMAILS` in Vercel to a comma-separated list of
+   exact addresses (e.g. `alice@adhocteam.us,bob@va.gov`); when set, it
+   fully replaces the domain check.
 
 ## Database setup
 

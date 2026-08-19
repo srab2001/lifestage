@@ -10,6 +10,23 @@ import Google from "next-auth/providers/google";
  */
 const ALLOWED_EMAIL_DOMAIN = "adhocteam.us";
 
+// ADMIN_EMAILS (comma-separated, case-insensitive) is a named allow-list —
+// set it in Vercel to restrict /dashboard to specific people instead of
+// the whole @adhocteam.us domain. Leave it unset to keep the domain check.
+const ADMIN_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
+);
+
+function isAllowedEmail(email: string) {
+  if (ADMIN_EMAILS.size > 0) {
+    return ADMIN_EMAILS.has(email.toLowerCase());
+  }
+  return email.toLowerCase().endsWith(`@${ALLOWED_EMAIL_DOMAIN}`);
+}
+
 // Auth.js requires AUTH_SECRET in production (Vercel env — see README Phase
 // 0). Falling back only outside production keeps `npm run dev` usable
 // before that setup step without weakening the real deployment.
@@ -26,7 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ profile }) {
       const email = profile?.email;
-      return Boolean(email && email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`));
+      return Boolean(email && isAllowedEmail(email));
     },
   },
 });
