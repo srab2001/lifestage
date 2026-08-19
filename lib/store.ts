@@ -232,8 +232,16 @@ class PostgresStore implements Store {
     // fresh Neon branch — `npm run db:init` remains available for manual/CI
     // use, but production should never 500 just because that step was
     // skipped ("nothing fails silently" — see design doc Section 2.1).
-    this.schemaReady = Promise.all(
-      INIT_STATEMENTS.map((statement) => this.pool.query(statement)),
+    //
+    // Statements must run in order, not via Promise.all: the pg Pool checks
+    // out a separate connection per query, so concurrent DDL has no
+    // happens-before relationship — third_party_requests references
+    // submissions(id), and the trace_events index depends on trace_events
+    // existing, so running them concurrently can (and in production, did)
+    // race a table's own index/foreign-key ahead of its CREATE TABLE.
+    this.schemaReady = INIT_STATEMENTS.reduce(
+      (prev, statement) => prev.then(() => this.pool.query(statement)),
+      Promise.resolve<unknown>(undefined),
     );
   }
 
