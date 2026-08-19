@@ -1,6 +1,6 @@
 "use client";
 
-import { Field, inputClass } from "@/components/ui";
+import { Field, inputClass, selectClass } from "@/components/ui";
 import type { ClaimantInfo } from "@/lib/schema";
 
 const RELATIONSHIPS: { value: ClaimantInfo["relationshipToVeteran"]; label: string }[] = [
@@ -39,7 +39,7 @@ export function ClaimantStep({
       <Field label="Relationship to Veteran" htmlFor="c-relationship">
         <select
           id="c-relationship"
-          className={inputClass}
+          className={selectClass}
           value={value.relationshipToVeteran ?? ""}
           onChange={(e) =>
             onChange({

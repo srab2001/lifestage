@@ -15,7 +15,9 @@ implements.
 **This is a capture/design proof-of-concept, not a VA.gov production
 system.** See "What this proof-of-concept intentionally does not attempt"
 in the design doc (Section 7) — no real OCR/ML, no Login.gov/ID.me, no
-VA.gov Design System, no integration with BGS/MMS/MAS/BPDS, no real Kafka.
+integration with BGS/MMS/MAS/BPDS, no real Kafka. It does now use the real
+USWDS component library (see Design system, below) rather than an
+approximation of one.
 
 ## What's here
 
@@ -31,6 +33,8 @@ VA.gov Design System, no integration with BGS/MMS/MAS/BPDS, no real Kafka.
 | Staff observability dashboard (Google-auth gated) | `app/(main)/dashboard` |
 | Google auth (Auth.js v5) | `auth.ts`, `proxy.ts` |
 | API routes | `app/api/*` |
+| USWDS-based UI primitives (button, input, alert, tag) | `components/ui.tsx` |
+| Official .gov identifier banner | `components/gov-banner.tsx` |
 
 ## Running locally
 
@@ -107,6 +111,31 @@ tables the Postgres-backed store in `lib/store.ts` expects.
 - **Auth.js (NextAuth v5)** — Google OAuth restricted to `@adhocteam.us`,
   gating `/dashboard` only.
 
+## Design system
+
+The UI is built on the real [USWDS](https://designsystem.digital.gov/)
+component library (`@uswds/uswds`) — the design system VA.gov itself is
+built on — not a hand-approximated look-alike:
+
+- The official ".gov" identifier banner (`components/gov-banner.tsx`),
+  interactive expand/collapse included.
+- Real `usa-button`, `usa-input`, `usa-select`, `usa-textarea`,
+  `usa-alert`, `usa-tag`, and `usa-step-indicator` markup, centralized in
+  `components/ui.tsx` and `components/wizard/wizard-shell.tsx` so every
+  page inherits it without per-page changes.
+- `usa-header`/`usa-nav` with USWDS's own mobile off-canvas menu and
+  accordion behavior, powered by `uswds.min.js` (loaded once in
+  `app/layout.tsx`).
+- Color tokens (`app/globals.css`) snapped to USWDS's default "blue"
+  theme values rather than hand-picked hex codes.
+
+**What this doesn't do**: USWDS ships with default theme settings; it
+does not reproduce VA.gov's own Sass-level theme customization (that
+requires compiling USWDS from source with VA's specific settings file,
+not just importing the precompiled CSS this project uses). Close, not
+identical — see `LESSONS_LEARNED.md` for the specifics found integrating
+it.
+
 ## CI
 
 `.github/workflows/ci.yml` runs two jobs on every pull request and push to
@@ -132,6 +161,11 @@ third-party routing → observability & delivery reporting → hardening &
 handoff. See the doc for the exact Claude Code prompts used at each phase,
 and `LESSONS_LEARNED.md` for what happened when each phase actually ran
 against production.
+
+A further phase beyond the doc's original eight — VA.gov Design System
+(USWDS) compliance — closes one of the gaps named in Section 7 ("not
+final, VA.gov Design-System-compliant production screens"). See Design
+system, above, and Section 11 of the design doc.
 
 ## More documentation
 

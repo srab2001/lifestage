@@ -33,27 +33,50 @@ export function WizardShell({
 }) {
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      <p className="text-xs font-bold uppercase tracking-wide text-[color:var(--color-muted)]">
-        Lifestage interview
-      </p>
-      <div className="mt-3 flex gap-1.5" aria-hidden>
-        {WIZARD_STEPS.map((step, i) => (
-          <span
-            key={step}
-            className={`h-1.5 flex-1 rounded-full ${
-              i <= stepIndex ? "bg-[color:var(--color-navy)]" : "bg-[color:var(--color-border)]"
-            }`}
-          />
-        ))}
+      <div
+        className="usa-step-indicator usa-step-indicator--no-labels usa-step-indicator--counters-sm"
+        aria-label="Lifestage interview progress"
+      >
+        <ol className="usa-step-indicator__segments">
+          {WIZARD_STEPS.map((step, i) => (
+            <li
+              key={step}
+              className={`usa-step-indicator__segment ${
+                i < stepIndex
+                  ? "usa-step-indicator__segment--complete"
+                  : i === stepIndex
+                    ? "usa-step-indicator__segment--current"
+                    : ""
+              }`}
+            >
+              <span className="usa-step-indicator__segment-label">
+                {step}
+                <span className="usa-sr-only">
+                  {i < stepIndex ? "completed" : i === stepIndex ? "current" : ""}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        <div className="usa-step-indicator__header">
+          {/* h1, not USWDS's usual h2/h3 — each step has no other page
+              heading, so this is the page's one-and-only h1. */}
+          <h1 className="usa-step-indicator__heading">
+            <span className="usa-step-indicator__heading-counter">
+              <span className="usa-sr-only">Step</span>
+              <span className="usa-step-indicator__current-step">{stepIndex + 1}</span>
+              <span className="usa-step-indicator__total-steps">
+                of {WIZARD_STEPS.length}
+              </span>
+            </span>
+            <span className="usa-step-indicator__heading-text">{title}</span>
+          </h1>
+        </div>
       </div>
-      <p className="mt-1 text-xs text-[color:var(--color-muted)]">
-        Step {stepIndex + 1} of {WIZARD_STEPS.length}
-      </p>
 
-      <h1 className="mt-6 text-xl font-bold text-[color:var(--color-navy)]">{title}</h1>
       {hint && <p className="mt-2 text-sm text-[color:var(--color-muted)]">{hint}</p>}
 
-      <div className="mt-6 rounded border border-[color:var(--color-border)] p-6">
+      <div className="mt-6 border border-[color:var(--color-border)] p-6">
         {children}
       </div>
 

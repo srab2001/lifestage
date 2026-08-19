@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored USWDS assets copied verbatim into public/ — not our code.
+    "public/uswds/**",
   ]),
 ]);
 

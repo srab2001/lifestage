@@ -1,6 +1,6 @@
 "use client";
 
-import { Field } from "@/components/ui";
+import { Field, textareaClass } from "@/components/ui";
 import type { AidAttendance } from "@/lib/schema";
 
 export function AidAttendanceStep({
@@ -51,7 +51,7 @@ export function AidAttendanceStep({
           <textarea
             id="aa-details"
             rows={4}
-            className="rounded border border-[color:var(--color-border)] px-3 py-2 text-sm focus:border-[color:var(--color-blue)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-blue-light)]"
+            className={textareaClass}
             value={value.details ?? ""}
             onChange={(e) => onChange({ details: e.target.value })}
           />

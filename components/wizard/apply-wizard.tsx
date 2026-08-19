@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Alert } from "@/components/ui";
 import { WizardShell, WIZARD_STEPS } from "./wizard-shell";
 import { VeteranStep } from "./veteran-step";
 import { ClaimantStep } from "./claimant-step";
@@ -115,9 +116,7 @@ export function ApplyWizard() {
     <div>
       {error && (
         <div className="mx-auto max-w-2xl px-6 pt-6">
-          <p className="rounded border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
-            {error}
-          </p>
+          <Alert type="error">{error}</Alert>
         </div>
       )}
 
