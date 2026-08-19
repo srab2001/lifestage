@@ -109,8 +109,19 @@ tables the Postgres-backed store in `lib/store.ts` expects.
 
 ## CI
 
-`.github/workflows/ci.yml` runs `npm run lint` and `npm run build` on every
-pull request and push to `main`.
+`.github/workflows/ci.yml` runs two jobs on every pull request and push to
+`main`:
+
+- `lint-and-build` — `npm run lint` and `npm run build`.
+- `accessibility` — `npm run test:a11y`, an automated WCAG 2.0/2.1 A/AA
+  sweep (Playwright + axe-core, see `tests/a11y.spec.ts`) across the pages
+  every visitor can reach unauthenticated (`/`, `/apply`, `/schema`, and the
+  third-party portal's invalid-link state). Auth-gated and token-gated pages
+  aren't covered by this static check — see `LESSONS_LEARNED.md`.
+
+Locally: `npm run test:a11y` (needs Playwright's Chromium —
+`npx playwright install chromium` once, or point `PLAYWRIGHT_CHROMIUM_PATH`
+at a Chromium binary you already have).
 
 ## Phased delivery
 
@@ -118,4 +129,38 @@ This app was built in the same small, independently-shippable phases
 described in Section 8 of the design doc: scaffold & CI → Google auth →
 Neon data layer → Lifestage interview → extraction & validation → secure
 third-party routing → observability & delivery reporting → hardening &
-handoff. See the doc for the exact Claude Code prompts used at each phase.
+handoff. See the doc for the exact Claude Code prompts used at each phase,
+and `LESSONS_LEARNED.md` for what happened when each phase actually ran
+against production.
+
+## More documentation
+
+- **[USER_GUIDE.md](USER_GUIDE.md)** — how to use each surface of the app:
+  the claimant interview, the physician portal, and the staff dashboard.
+- **[LESSONS_LEARNED.md](LESSONS_LEARNED.md)** — what broke, what surprised
+  us, and what we'd do differently, from scaffold through production
+  verification.
+- **[docs/Lifestage_Benefits_Optimization_Design_Strategy.docx](docs/Lifestage_Benefits_Optimization_Design_Strategy.docx)**
+  — the original design rationale and PWS capability mapping, kept current
+  with build/verification status.
+
+## Handoff & credential rotation
+
+Before handing this off or extending it beyond the current reviewer set,
+rotate every credential that was typed into a laptop or a chat during
+Phase 0/2/3 setup:
+
+1. **Google OAuth** — in Google Cloud Console, generate a new Client
+   Secret for the existing Client ID (or a new Client ID entirely), update
+   `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in Vercel, then delete the old
+   secret.
+2. **AUTH_SECRET** — generate a fresh one (`openssl rand -base64 32`) and
+   update it in Vercel. This invalidates all existing sessions, which is
+   the point.
+3. **Neon `DATABASE_URL`** — reset the database password/role from the
+   Neon console (or provision a new role) and update `DATABASE_URL` in
+   Vercel for both Production and Preview.
+
+After rotating, redeploy (any push, or a manual redeploy from the Vercel
+dashboard) so the running app picks up the new values — Vercel env var
+changes don't take effect on already-running deployments.
