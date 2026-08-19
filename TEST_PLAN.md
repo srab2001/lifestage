@@ -77,7 +77,16 @@ and re-run all three after any fix, not just the one that failed.
 | Incident case study renders the real diff and links to `LESSONS_LEARNED.md` | Manual: scroll to the incident section; confirm the before/after code snippet matches the actual historical fix and the link resolves. | Regression |
 | "Re-check now" refreshes status tiles without a full page reload | Manual: change an env var (or simulate DB unreachability), click **Re-check now**, confirm the tiles update without navigating away. | Edge case |
 
-## 7. Deployment / environment
+## 7. "Why this matters" value callouts (every demonstration screen)
+
+| What to test | How | Priority |
+| --- | --- | --- |
+| A callout renders on every demonstration screen | Manual: visit `/`, each of the 7 `/apply` wizard steps, a valid `/third-party/<token>` link, `/dashboard`, `/schema`, and all 5 sections of `/under-the-hood`; confirm a "Why this matters" (or page-specific heading) box with distinct "For the VA" and "For the Veteran" rows appears on each. | Smoke |
+| Callout copy is specific to its screen, not generic filler | Manual: spot-check a few screens' copy against what that screen actually does (e.g. the dependents step's callout should reference dependents, not a generic sentence reused elsewhere). | Regression |
+| Callout renders correctly with USWDS `usa-summary-box` styling | Covered by `npm run test:a11y` (axe-core would flag a malformed `role="region"`/`aria-labelledby` pairing); visually confirmed via Playwright screenshot. | Regression |
+| Wizard step callouts survive Back/Continue navigation | Manual: move forward and back through `/apply`; confirm each step's callout still shows the correct step-specific copy, not a stale one from a previous step. | Edge case |
+
+## 8. Deployment / environment
 
 | What to test | How | Priority |
 | --- | --- | --- |

@@ -161,6 +161,15 @@ adapted from a similar internal demo (`raven_demo`)'s "GuidedTour" and
 its own two recorded incidents rather than reused as-is. See
 `USER_GUIDE.md` for what each tour and the `/under-the-hood` page cover.
 
+Every demonstration screen also carries a **"Why this matters"** value
+callout (`components/value-callout.tsx`, a USWDS `usa-summary-box`) with
+two fixed rows — **For the VA** and **For the Veteran** — spelling out
+that specific screen's value to each audience rather than leaving it
+implicit. This runs across all 7 wizard steps, the landing page, the
+physician portal, the dashboard, the schema page, and all 5
+`/under-the-hood` sections (17 instances total), each with copy specific
+to what that screen actually does.
+
 ## CI
 
 `.github/workflows/ci.yml` runs two jobs on every pull request and push to

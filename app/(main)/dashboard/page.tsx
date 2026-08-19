@@ -3,6 +3,7 @@ import { auth, signOut } from "@/auth";
 import { getStore } from "@/lib/store";
 import { StatusBadge } from "@/components/ui";
 import { TourLauncher, type TourStep } from "@/components/guided-tour";
+import { ValueCallout } from "@/components/value-callout";
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -84,6 +85,12 @@ export default async function DashboardPage({
           )}
         </div>
       </div>
+
+      <ValueCallout
+        id="value-dashboard"
+        va="Claim status, extraction confidence, and a full transaction trace are visible live — the exact Delivery and Monitoring Report data PWS 5.2 calls for, without a separate reporting pipeline to build and maintain."
+        veteran="The audit trail exposed here is what lets someone actually answer 'what happened to my claim,' instead of a claim's status disappearing into a black box after it's filed."
+      />
 
       <div
         data-tour="dashboard-metrics"

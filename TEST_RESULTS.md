@@ -10,7 +10,7 @@ rather than adding a new one for the same test.
 | --- | --- | --- | --- |
 | `npm run lint` | ✅ Pass | 2026-08-19 | 0 errors, 3 pre-existing `no-img-element` warnings in `gov-banner.tsx` (unrelated to this change). |
 | `npm run build` | ✅ Pass | 2026-08-19 | Compiles, type-checks, and statically generates `/`, `/apply`, `/schema`, `/under-the-hood` (`_not-found`) with no errors; `/under-the-hood`'s two new API routes (`/api/status`, `/api/demo/extract-preview`) build as dynamic routes alongside the existing ones. |
-| `npm run test:a11y` | ✅ Pass (5/5) | 2026-08-19 | All five pages (`/`, `/apply`, `/schema`, `/third-party/invalid-token`, `/under-the-hood`) clean against WCAG 2.1 A/AA via axe-core, including the new tour buttons and the `/under-the-hood` page's live-status tiles, extraction-preview form, and error-demo buttons. Ran with `PLAYWRIGHT_CHROMIUM_PATH` pointed at the environment's installed Chromium. |
+| `npm run test:a11y` | ✅ Pass (5/5) | 2026-08-19 | All five pages (`/`, `/apply`, `/schema`, `/third-party/invalid-token`, `/under-the-hood`) clean against WCAG 2.1 A/AA via axe-core, including the new tour buttons and the `/under-the-hood` page's live-status tiles, extraction-preview form, and error-demo buttons. Ran with `PLAYWRIGHT_CHROMIUM_PATH` pointed at the environment's installed Chromium. Re-run after adding the "Why this matters" value callouts (17 `usa-summary-box` instances across every demonstration screen) — still 5/5 clean. |
 
 ## 1. Claimant / Veteran interview
 
@@ -73,7 +73,17 @@ rather than adding a new one for the same test.
 | Incident case study renders the real diff and links to `LESSONS_LEARNED.md` | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified: the `Promise.all` → sequential-chain diff and the `LESSONS_LEARNED.md` link both render correctly at the bottom of the page. |
 | "Re-check now" refreshes status tiles without a full page reload | Not run here | — | Manual check; not exercised by the smoke script. |
 
-## 7. Deployment / environment
+## 7. "Why this matters" value callouts
+
+| Test | Result | Date | Notes |
+| --- | --- | --- | --- |
+| A callout renders on every demonstration screen | ✅ Pass (manual, Playwright smoke) | 2026-08-19 | Screenshot-verified on `/` (after the disclaimer), `/apply` step 1 (Veteran information), and all 5 sections of `/under-the-hood`; visually confirmed correct USWDS `usa-summary-box` styling and layout in each case. |
+| Callout copy is specific to its screen | ✅ Pass (code review) | 2026-08-19 | Each of the 17 instances (7 wizard steps, landing, physician portal, dashboard, schema, 5 under-the-hood sections) has distinct copy referencing that screen's actual feature — spot-checked during implementation, not generic filler. |
+| Callout renders correctly with USWDS styling | ✅ Pass | 2026-08-19 | Covered by `npm run test:a11y` (no new violations from the `role="region"`/`aria-labelledby` markup) and confirmed visually. |
+| Wizard step callouts survive Back/Continue navigation | Not run here | — | Manual check; not exercised by the automated suite or this pass's smoke script (which only visited step 1). |
+| Physician portal and dashboard callouts | Not run here | — | Physician portal needs a freshly generated `/third-party/<token>` link; dashboard needs a signed-in Google session — neither available in this environment. |
+
+## 8. Deployment / environment
 
 | Test | Result | Date | Notes |
 | --- | --- | --- | --- |
