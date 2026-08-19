@@ -20,7 +20,12 @@ export default function SchemaPage() {
         Version {SCHEMA_VERSION}
       </p>
 
-      <pre className="mt-6 max-h-[70vh] overflow-auto rounded border border-[color:var(--color-border)] bg-[#0b1f38] p-5 text-xs leading-relaxed text-[#d6e4ff]">
+      <pre
+        tabIndex={0}
+        role="region"
+        aria-label="Data dictionary JSON Schema"
+        className="mt-6 max-h-[70vh] overflow-auto rounded border border-[color:var(--color-border)] bg-[#0b1f38] p-5 text-xs leading-relaxed text-[#d6e4ff] focus:outline-2 focus:outline-offset-2 focus:outline-[color:var(--color-blue)]"
+      >
         {JSON.stringify(dictionary, null, 2)}
       </pre>
     </div>

@@ -19,6 +19,10 @@ const devFallbackSecret =
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
   secret: process.env.AUTH_SECRET ?? devFallbackSecret,
+  // Vercel deployments are trusted automatically; this covers `npm run
+  // start` and any non-Vercel host so the proxy's session lookup doesn't
+  // throw UntrustedHost on its own domain.
+  trustHost: true,
   callbacks: {
     async signIn({ profile }) {
       const email = profile?.email;
